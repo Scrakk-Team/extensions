@@ -1,0 +1,37 @@
+name: release
+on:
+  push:
+    tags:
+      - '*@*'
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: SEF CLI
+        run: npm install -g https://github.com/Scrakk-Team/sef-builder/releases/latest/download/cli.tgz
+      - name: Build + pack
+        run: |
+          id="${GITHUB_REF_NAME%@*}"
+          version="${GITHUB_REF_NAME##*@}"
+          if [ ! -f "$id/manifest.json" ]; then
+            echo "no existe $id/manifest.json"; exit 1
+          fi
+          node -e '
+            const fs = require("node:fs")
+            const manifest = JSON.parse(fs.readFileSync(process.argv[1] + "/manifest.json", "utf-8"))
+            if (manifest.id !== process.argv[1]) { console.error("el id del manifest (" + manifest.id + ") no coincide con la carpeta"); process.exit(1) }
+            if (manifest.version !== process.argv[2]) { console.error("el manifest dice " + manifest.version + " y el tag " + process.argv[2]); process.exit(1) }
+          ' "$id" "$version"
+          sef build "$id"
+          sef pack "$id"
+          echo "ASSET=$id.sef" >> "$GITHUB_ENV"
+      - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" "$ASSET" --title "$GITHUB_REF_NAME" --generate-notes

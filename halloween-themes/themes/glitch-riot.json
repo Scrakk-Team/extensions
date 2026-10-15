@@ -1,0 +1,162 @@
+{
+  "name": "Glitch Riot",
+  "type": "dark",
+  "colors": {
+    "bg": "#0a0a0c",
+    "surface": "#141418",
+    "surfaceRaised": "#1e1e24",
+    "border": "#2e2e38",
+    "borderStrong": "#46465a",
+    "panelBorder": "#2e2e38",
+    "editorBg": "#141418",
+    "titleBarBg": "#08080a",
+    "activityBarBg": "#06060a",
+    "statusBarBg": "#0c0c12",
+    "accent": "#ff003c",
+    "accentHover": "#ff3364",
+    "accentActive": "#ff5c85",
+    "onAccent": "#ffffff",
+    "text": "#f2f2f7",
+    "textSecondary": "#a8a8b8",
+    "textMuted": "#6e6e80",
+    "error": "#ff2740",
+    "errorHover": "#ff5568",
+    "onError": "#ffffff",
+    "warning": "#ffd400",
+    "success": "#00ff88",
+    "info": "#00c2ff",
+    "hover": "#1c1c24",
+    "active": "#26262f",
+    "scrollbarThumb": "#2a2a34",
+    "scrollbarThumbHover": "#3a3a48",
+    "indentGuide": "#1e1e28",
+    "diffAdded": "rgba(0,255,136,0.16)",
+    "diffRemoved": "rgba(255,0,60,0.18)",
+    "diffModified": "rgba(255,212,0,0.18)"
+  },
+  "tokenColors": [
+    {
+      "scope": "comment",
+      "foreground": "#6e6e80",
+      "fontStyle": "italic"
+    },
+    {
+      "scope": "string",
+      "foreground": "#00ff88"
+    },
+    {
+      "scope": "string.regexp",
+      "foreground": "#00ff88"
+    },
+    {
+      "scope": "constant.numeric",
+      "foreground": "#ffd400"
+    },
+    {
+      "scope": "constant.language",
+      "foreground": "#ffe066"
+    },
+    {
+      "scope": "constant.character",
+      "foreground": "#ffe066"
+    },
+    {
+      "scope": "keyword",
+      "foreground": "#ff003c"
+    },
+    {
+      "scope": "keyword.control",
+      "foreground": "#ff003c"
+    },
+    {
+      "scope": "storage",
+      "foreground": "#ff003c"
+    },
+    {
+      "scope": "storage.type",
+      "foreground": "#b14dff"
+    },
+    {
+      "scope": "keyword.operator",
+      "foreground": "#ff6b00"
+    },
+    {
+      "scope": "entity.name.function",
+      "foreground": "#00c2ff"
+    },
+    {
+      "scope": "support.function",
+      "foreground": "#00c2ff"
+    },
+    {
+      "scope": "entity.name.type",
+      "foreground": "#b14dff"
+    },
+    {
+      "scope": "support.type",
+      "foreground": "#b14dff"
+    },
+    {
+      "scope": "entity.name.class",
+      "foreground": "#ff2ec4"
+    },
+    {
+      "scope": "support.class",
+      "foreground": "#ff2ec4"
+    },
+    {
+      "scope": "entity.name.tag",
+      "foreground": "#ff4d6d"
+    },
+    {
+      "scope": "entity.other.attribute-name",
+      "foreground": "#7df9ff"
+    },
+    {
+      "scope": "variable",
+      "foreground": "#f2f2f7"
+    },
+    {
+      "scope": "variable.parameter",
+      "foreground": "#4da3ff"
+    },
+    {
+      "scope": "variable.other.property",
+      "foreground": "#00ffc8"
+    },
+    {
+      "scope": "meta.object-literal.key",
+      "foreground": "#00ffc8"
+    },
+    {
+      "scope": "support.type.property-name",
+      "foreground": "#00ffc8"
+    },
+    {
+      "scope": "punctuation",
+      "foreground": "#7a7a8c"
+    },
+    {
+      "scope": "markup.heading",
+      "foreground": "#ff003c",
+      "fontStyle": "bold"
+    },
+    {
+      "scope": "markup.bold",
+      "foreground": "#ffd400",
+      "fontStyle": "bold"
+    },
+    {
+      "scope": "markup.italic",
+      "foreground": "#00c2ff",
+      "fontStyle": "italic"
+    }
+  ],
+  "fonts": {
+    "ui": {
+      "family": "Rubik Glitch",
+      "source": "https://fonts.gstatic.com/s/rubikglitch/v2/qkBSXv8b_srFRYQVYrDKh9ZfkiTGCNg.woff2",
+      "size": "12px"
+    }
+  }
+}

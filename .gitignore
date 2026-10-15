@@ -1,0 +1,3 @@
+# Artefactos de build (los produce el workflow de release, no van al repo).
+dist/
+*.sef

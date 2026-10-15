@@ -1,0 +1,112 @@
+{
+  "id": "canvas",
+  "name": "Canvas",
+  "version": "1.0.0",
+  "author": "Scrakk Team",
+  "description": "Un lienzo para dibujar: panel propio, tema Canvas Blueprint, comandos en la paleta y un tool de IA que dibuja en el mismo lienzo.",
+  "engine": ">=0.1.5",
+  "permissions": [],
+  "entry": "dist/modules.js",
+  "contributes": {
+    "panels": [
+      {
+        "id": "canvas-board",
+        "title": "Canvas",
+        "closable": true,
+        "component": "panels/Canvas.tsx"
+      }
+    ],
+    "activityBar": [
+      {
+        "id": "canvas-btn",
+        "label": "Canvas",
+        "icon": "icons/canvas.tsx",
+        "side": "left",
+        "target": "left",
+        "panelId": "canvas-board",
+        "order": 72
+      }
+    ],
+    "themes": [
+      {
+        "id": "canvas-blueprint",
+        "name": "Canvas Blueprint",
+        "type": "dark",
+        "path": "themes/canvas-blueprint.json"
+      }
+    ],
+    "tools": [
+      {
+        "name": "canvas_draw",
+        "label": "Dibujar en el lienzo",
+        "description": "Dibuja figuras en el lienzo de la extensión Canvas (el panel «Canvas»). Las coordenadas son NORMALIZADAS: [0,0] es la esquina superior izquierda y [1,1] la inferior derecha, así que sirve cualquier tamaño de panel. Pensado para bocetos simples: casas, flechas, diagramas, caras, texto corto.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "clear": {
+              "type": "boolean",
+              "description": "Vaciar el lienzo antes de dibujar (para empezar de cero)."
+            },
+            "shapes": {
+              "type": "array",
+              "description": "Las figuras, en orden de dibujo (lo de arriba se pinta encima).",
+              "maxItems": 200,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": ["stroke", "line", "rect", "circle", "dot", "text"],
+                    "description": "stroke = trazo libre (polilínea, la forma natural para curvas); line = recta entre 2 puntos; rect = rectángulo dado por 2 esquinas opuestas; circle = círculo dado por el centro + un punto del borde; dot = punto relleno; text = texto corto."
+                  },
+                  "points": {
+                    "type": "array",
+                    "description": "Puntos [x, y] normalizados (0..1). stroke: todos los puntos de la polilínea. line/rect/circle: exactamente 2. dot/text: 1.",
+                    "minItems": 1,
+                    "maxItems": 400,
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "items": { "type": "number" }
+                    }
+                  },
+                  "color": {
+                    "type": "string",
+                    "description": "Color CSS (#rrggbb o rgb()). Si se omite, la figura va en el color de la IA."
+                  },
+                  "width": {
+                    "type": "number",
+                    "description": "Grosor en px (1-40). En text es el tamaño de la letra (crece con él). Default 2.5."
+                  },
+                  "fill": {
+                    "type": "boolean",
+                    "description": "Rellenar (solo rect y circle)."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "El texto (solo kind = text)."
+                  }
+                },
+                "required": ["kind", "points"]
+              }
+            },
+            "note": {
+              "type": "string",
+              "description": "Qué dibujaste, en una frase, para mostrárselo al usuario."
+            }
+          }
+        },
+        "command": "canvas.draw",
+        "family": "canvas",
+        "familyLabel": "Canvas",
+        "type": "canvas-draw",
+        "typeLabel": "Dibujo",
+        "dangerLevel": "safe",
+        "enabledByDefault": true,
+        "icon": "pencil",
+        "headerArgKey": "note"
+      }
+    ]
+  }
+}

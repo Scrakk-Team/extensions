@@ -1,0 +1,85 @@
+{
+  "id": "halloween-themes",
+  "name": "Halloween Themes",
+  "version": "1.3.0",
+  "author": "julian_tcg",
+  "description": "Doce temas de color para Scrakk Studio — la mayoría oscuros y con paletas de terror: Blood Cult, Sewer Rot, 8-Bit Abyss, Neon Monotone y Glitch Riot, más Neon Abyss, Magma Core, Glacier Void y Vapor Terminal (oscuros) y Toxic Bloom, Sandstorm y Ultraviolet Lab (claros). Cinco traen tipografía propia.",
+  "license": "Apache-2.0",
+  "engine": ">=0.1.0",
+  "contributes": {
+    "themes": [
+      {
+        "id": "neon-abyss",
+        "name": "Neon Abyss",
+        "type": "dark",
+        "path": "themes/neon-abyss.json"
+      },
+      {
+        "id": "magma-core",
+        "name": "Magma Core",
+        "type": "dark",
+        "path": "themes/magma-core.json"
+      },
+      {
+        "id": "glacier-void",
+        "name": "Glacier Void",
+        "type": "dark",
+        "path": "themes/glacier-void.json"
+      },
+      {
+        "id": "vapor-terminal",
+        "name": "Vapor Terminal",
+        "type": "dark",
+        "path": "themes/vapor-terminal.json"
+      },
+      {
+        "id": "blood-cult",
+        "name": "Blood Cult",
+        "type": "dark",
+        "path": "themes/blood-cult.json"
+      },
+      {
+        "id": "sewer-rot",
+        "name": "Sewer Rot",
+        "type": "dark",
+        "path": "themes/sewer-rot.json"
+      },
+      {
+        "id": "8bit-abyss",
+        "name": "8-Bit Abyss",
+        "type": "dark",
+        "path": "themes/8bit-abyss.json"
+      },
+      {
+        "id": "neon-monotone",
+        "name": "Neon Monotone",
+        "type": "dark",
+        "path": "themes/neon-monotone.json"
+      },
+      {
+        "id": "glitch-riot",
+        "name": "Glitch Riot",
+        "type": "dark",
+        "path": "themes/glitch-riot.json"
+      },
+      {
+        "id": "toxic-bloom",
+        "name": "Toxic Bloom",
+        "type": "light",
+        "path": "themes/toxic-bloom.json"
+      },
+      {
+        "id": "sandstorm",
+        "name": "Sandstorm",
+        "type": "light",
+        "path": "themes/sandstorm.json"
+      },
+      {
+        "id": "ultraviolet-lab",
+        "name": "Ultraviolet Lab",
+        "type": "light",
+        "path": "themes/ultraviolet-lab.json"
+      }
+    ]
+  }
+}

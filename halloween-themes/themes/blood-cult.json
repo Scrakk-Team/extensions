@@ -1,0 +1,162 @@
+{
+  "name": "Blood Cult",
+  "type": "dark",
+  "colors": {
+    "bg": "#0a0304",
+    "surface": "#14060a",
+    "surfaceRaised": "#1e0a10",
+    "border": "#3a1420",
+    "borderStrong": "#571f30",
+    "panelBorder": "#3a1420",
+    "editorBg": "#14060a",
+    "titleBarBg": "#0c0406",
+    "activityBarBg": "#0a0305",
+    "statusBarBg": "#0c0406",
+    "accent": "#ff2b4a",
+    "accentHover": "#ff4d68",
+    "accentActive": "#ff6b82",
+    "onAccent": "#12030a",
+    "text": "#f5e6ea",
+    "textSecondary": "#c99aa8",
+    "textMuted": "#8a5f6d",
+    "error": "#ff1f3d",
+    "errorHover": "#ff4761",
+    "onError": "#ffffff",
+    "warning": "#d4a017",
+    "success": "#6fbf5f",
+    "info": "#b06bff",
+    "hover": "#220b12",
+    "active": "#2e0f18",
+    "scrollbarThumb": "#3c1520",
+    "scrollbarThumbHover": "#55202f",
+    "indentGuide": "#2a0e16",
+    "diffAdded": "rgba(111,191,95,0.16)",
+    "diffRemoved": "rgba(255,31,61,0.18)",
+    "diffModified": "rgba(212,160,23,0.18)"
+  },
+  "tokenColors": [
+    {
+      "scope": "comment",
+      "foreground": "#8a5f6d",
+      "fontStyle": "italic"
+    },
+    {
+      "scope": "string",
+      "foreground": "#d9c7a3"
+    },
+    {
+      "scope": "string.regexp",
+      "foreground": "#d9c7a3"
+    },
+    {
+      "scope": "constant.numeric",
+      "foreground": "#a33b2a"
+    },
+    {
+      "scope": "constant.language",
+      "foreground": "#8fd694"
+    },
+    {
+      "scope": "constant.character",
+      "foreground": "#8fd694"
+    },
+    {
+      "scope": "keyword",
+      "foreground": "#ff2b4a"
+    },
+    {
+      "scope": "keyword.control",
+      "foreground": "#ff2b4a"
+    },
+    {
+      "scope": "storage",
+      "foreground": "#ff2b4a"
+    },
+    {
+      "scope": "storage.type",
+      "foreground": "#c98b6b"
+    },
+    {
+      "scope": "keyword.operator",
+      "foreground": "#ff5c7a"
+    },
+    {
+      "scope": "entity.name.function",
+      "foreground": "#ff8fa3"
+    },
+    {
+      "scope": "support.function",
+      "foreground": "#ff8fa3"
+    },
+    {
+      "scope": "entity.name.type",
+      "foreground": "#c98b6b"
+    },
+    {
+      "scope": "support.type",
+      "foreground": "#c98b6b"
+    },
+    {
+      "scope": "entity.name.class",
+      "foreground": "#e05a3d"
+    },
+    {
+      "scope": "support.class",
+      "foreground": "#e05a3d"
+    },
+    {
+      "scope": "entity.name.tag",
+      "foreground": "#ff3d5e"
+    },
+    {
+      "scope": "entity.other.attribute-name",
+      "foreground": "#b0808f"
+    },
+    {
+      "scope": "variable",
+      "foreground": "#f5e6ea"
+    },
+    {
+      "scope": "variable.parameter",
+      "foreground": "#ffb3c1"
+    },
+    {
+      "scope": "variable.other.property",
+      "foreground": "#c9a227"
+    },
+    {
+      "scope": "meta.object-literal.key",
+      "foreground": "#c9a227"
+    },
+    {
+      "scope": "support.type.property-name",
+      "foreground": "#c9a227"
+    },
+    {
+      "scope": "punctuation",
+      "foreground": "#9c6b78"
+    },
+    {
+      "scope": "markup.heading",
+      "foreground": "#ff2b4a",
+      "fontStyle": "bold"
+    },
+    {
+      "scope": "markup.bold",
+      "foreground": "#a33b2a",
+      "fontStyle": "bold"
+    },
+    {
+      "scope": "markup.italic",
+      "foreground": "#ff8fa3",
+      "fontStyle": "italic"
+    }
+  ],
+  "fonts": {
+    "ui": {
+      "family": "Nosifer",
+      "source": "https://fonts.gstatic.com/s/nosifer/v23/ZGjXol5JTp0g5bxZWCRbVQNd.woff2",
+      "size": "12px"
+    }
+  }
+}

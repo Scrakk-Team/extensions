@@ -1,0 +1,24 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: SEF CLI
+        run: npm install -g https://github.com/Scrakk-Team/sef-builder/releases/latest/download/cli.tgz
+      - name: Validar cada extensión
+        run: |
+          status=0
+          for dir in */; do
+            [ -f "$dir/manifest.json" ] || continue
+            echo "— ${dir%/}"
+            sef validate "${dir%/}" || status=1
+          done
+          exit $status
