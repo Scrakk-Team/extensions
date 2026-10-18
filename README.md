@@ -11,7 +11,7 @@ you can install from Settings → Extensions, or from the app's store.
 
 | Extension | What it adds | Install |
 |---|---|---|
-| [`halloween-themes`](halloween-themes/) | 12 colour themes (9 dark / 3 light), five with their own typeface. Includes **Canvas Blueprint**'s sibling set: Blood Cult, Sewer Rot, 8-Bit Abyss, Neon Monotone, Glitch Riot… | `halloween-themes.sef` |
+| [`halloween-themes`](halloween-themes/) | 12 colour themes (9 dark / 3 light), five with their own typeface, plus the **Halloween Night** event and its Storm background (blood moon, clouds, rain, bats, a haunted house, a graveyard and lightning). Includes **Canvas Blueprint**'s sibling set: Blood Cult, Sewer Rot, 8-Bit Abyss, Neon Monotone, Glitch Riot… | `halloween-themes.sef` |
 | [`canvas`](canvas/) | A drawing board: a panel with a real `<canvas>` you draw on with the mouse, three palette commands, a theme of its own, and an **AI tool** (`canvas_draw`) so the assistant can draw on the same board | `canvas.sef` |
 
 ## Layout
@@ -20,7 +20,9 @@ you can install from Settings → Extensions, or from the app's store.
 extensions/
 ├── halloween-themes/          # one folder per extension
 │   ├── manifest.json          #   the id here is the folder name AND the install id
-│   └── themes/*.json          #   data (themes, icons, grammars, …)
+│   ├── themes/*.json          #   data (themes, icons, grammars, …)
+│   ├── events/*.json          #   event timelines
+│   └── overlay/*.tsx          #   background/effect components the event mounts
 ├── canvas/
 │   ├── manifest.json
 │   ├── panels/ runtime/ icons/ themes/
