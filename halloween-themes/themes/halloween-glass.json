@@ -3,6 +3,11 @@
   "type": "dark",
   "colors": {
     "bg": "transparent",
+    "background": {
+      "type": "overlay",
+      "overlay": "halloween-themes.storm",
+      "opacity": 1
+    },
     "surface": "rgba(8, 5, 14, 0.18)",
     "surfaceRaised": "rgba(14, 9, 24, 0.30)",
     "border": "rgba(150, 170, 230, 0.12)",
