@@ -47,13 +47,6 @@
       "fade": 1500
     },
     {
-      "at": 0,
-      "op": "stage.fog",
-      "amount": 0.45,
-      "tint": "accent",
-      "fade": 2000
-    },
-    {
       "at": 250,
       "op": "audio.play",
       "sound": "lobo"
