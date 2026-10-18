@@ -1,0 +1,162 @@
+{
+  "name": "Halloween Glass",
+  "type": "dark",
+  "colors": {
+    "bg": "transparent",
+    "surface": "rgba(8, 5, 14, 0.18)",
+    "surfaceRaised": "rgba(14, 9, 24, 0.30)",
+    "border": "rgba(150, 170, 230, 0.12)",
+    "borderStrong": "rgba(180, 200, 255, 0.18)",
+    "panelBorder": "rgba(150, 170, 230, 0.08)",
+    "editorBg": "rgba(8, 5, 14, 0.34)",
+    "titleBarBg": "rgba(8, 5, 14, 0.14)",
+    "activityBarBg": "rgba(8, 5, 14, 0.10)",
+    "statusBarBg": "rgba(8, 5, 14, 0.16)",
+    "accent": "#8aa4ff",
+    "accentHover": "#a8bbff",
+    "accentActive": "#c3d0ff",
+    "onAccent": "#080512",
+    "text": "#eef1ff",
+    "textSecondary": "#b9c2e0",
+    "textMuted": "#7f89a8",
+    "error": "#ff5d7a",
+    "errorHover": "#ff7a93",
+    "onError": "#14030a",
+    "warning": "#e0b45a",
+    "success": "#75d6a0",
+    "info": "#9b8cff",
+    "hover": "rgba(160, 180, 255, 0.08)",
+    "active": "rgba(160, 180, 255, 0.14)",
+    "scrollbarThumb": "rgba(160, 180, 255, 0.16)",
+    "scrollbarThumbHover": "rgba(160, 180, 255, 0.28)",
+    "indentGuide": "rgba(160, 180, 255, 0.08)",
+    "diffAdded": "rgba(117,214,160,0.16)",
+    "diffRemoved": "rgba(255,93,122,0.16)",
+    "diffModified": "rgba(224,180,90,0.16)"
+  },
+  "tokenColors": [
+    {
+      "scope": "comment",
+      "foreground": "#7f89a8",
+      "fontStyle": "italic"
+    },
+    {
+      "scope": "string",
+      "foreground": "#d9c7a3"
+    },
+    {
+      "scope": "string.regexp",
+      "foreground": "#d9c7a3"
+    },
+    {
+      "scope": "constant.numeric",
+      "foreground": "#9b8cff"
+    },
+    {
+      "scope": "constant.language",
+      "foreground": "#75d6a0"
+    },
+    {
+      "scope": "constant.character",
+      "foreground": "#75d6a0"
+    },
+    {
+      "scope": "keyword",
+      "foreground": "#8aa4ff"
+    },
+    {
+      "scope": "keyword.control",
+      "foreground": "#8aa4ff"
+    },
+    {
+      "scope": "storage",
+      "foreground": "#8aa4ff"
+    },
+    {
+      "scope": "storage.type",
+      "foreground": "#c9b27a"
+    },
+    {
+      "scope": "keyword.operator",
+      "foreground": "#a8bbff"
+    },
+    {
+      "scope": "entity.name.function",
+      "foreground": "#c3d0ff"
+    },
+    {
+      "scope": "support.function",
+      "foreground": "#c3d0ff"
+    },
+    {
+      "scope": "entity.name.type",
+      "foreground": "#c9b27a"
+    },
+    {
+      "scope": "support.type",
+      "foreground": "#c9b27a"
+    },
+    {
+      "scope": "entity.name.class",
+      "foreground": "#ff9b73"
+    },
+    {
+      "scope": "support.class",
+      "foreground": "#ff9b73"
+    },
+    {
+      "scope": "entity.name.tag",
+      "foreground": "#7fd6c0"
+    },
+    {
+      "scope": "entity.other.attribute-name",
+      "foreground": "#b9c2e0"
+    },
+    {
+      "scope": "variable",
+      "foreground": "#eef1ff"
+    },
+    {
+      "scope": "variable.parameter",
+      "foreground": "#c3d0ff"
+    },
+    {
+      "scope": "variable.other.property",
+      "foreground": "#e0c07a"
+    },
+    {
+      "scope": "meta.object-literal.key",
+      "foreground": "#e0c07a"
+    },
+    {
+      "scope": "support.type.property-name",
+      "foreground": "#e0c07a"
+    },
+    {
+      "scope": "punctuation",
+      "foreground": "#8e9ab8"
+    },
+    {
+      "scope": "markup.heading",
+      "foreground": "#8aa4ff",
+      "fontStyle": "bold"
+    },
+    {
+      "scope": "markup.bold",
+      "foreground": "#e0c07a",
+      "fontStyle": "bold"
+    },
+    {
+      "scope": "markup.italic",
+      "foreground": "#c3d0ff",
+      "fontStyle": "italic"
+    }
+  ],
+  "fonts": {
+    "ui": {
+      "family": "Nosifer",
+      "source": "https://fonts.gstatic.com/s/nosifer/v23/ZGjXol5JTp0g5bxZWCRbVQNd.woff2",
+      "size": "12px"
+    }
+  }
+}

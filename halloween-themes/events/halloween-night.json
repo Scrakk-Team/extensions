@@ -13,7 +13,7 @@
   "durationMs": 45000,
   "background": "halloween-themes.storm",
   "override": {
-    "theme": "blood-cult"
+    "theme": "halloween-glass"
   },
   "sounds": {
     "tormenta": {
