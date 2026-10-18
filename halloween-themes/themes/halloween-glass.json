@@ -6,7 +6,8 @@
     "background": {
       "type": "overlay",
       "overlay": "halloween-themes.storm",
-      "opacity": 1
+      "opacity": 1,
+      "glass": false
     },
     "surface": "rgba(8, 5, 14, 0.18)",
     "surfaceRaised": "rgba(14, 9, 24, 0.30)",
