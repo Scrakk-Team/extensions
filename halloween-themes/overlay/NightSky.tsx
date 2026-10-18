@@ -397,18 +397,17 @@ function drawPumpkins(ctx: CanvasRenderingContext2D, w: number, h: number): void
     ctx.save()
     ctx.translate(x, y)
 
-    const glow = ctx.createRadialGradient(0, -s * 0.15, s * 0.1, 0, -s * 0.15, s * 2.6)
-    glow.addColorStop(0, 'rgba(255, 150, 60, 0.22)')
-    glow.addColorStop(1, 'rgba(255, 80, 20, 0)')
-    ctx.fillStyle = glow
-    ctx.fillRect(-s * 2.6, -s * 2.6, s * 5.2, s * 5.2)
-
-    ctx.fillStyle = '#0a0507'
+    // Cuerpo naranja: sin halo alrededor; la luz sale solo de la cara.
+    const body = ctx.createLinearGradient(-s * 0.8, -s * 0.9, s * 0.8, s)
+    body.addColorStop(0, '#f5a24e')
+    body.addColorStop(0.45, '#dd6f2c')
+    body.addColorStop(1, '#9e3c17')
+    ctx.fillStyle = body
     ctx.beginPath()
     ctx.ellipse(0, 0, s, s * 0.78, 0, 0, TAU)
     ctx.fill()
 
-    ctx.strokeStyle = 'rgba(70, 30, 25, 0.7)'
+    ctx.strokeStyle = 'rgba(92, 34, 10, 0.55)'
     ctx.lineWidth = Math.max(0.7, s * 0.05)
     for (const offset of [-0.45, 0, 0.45]) {
       ctx.beginPath()
@@ -416,10 +415,14 @@ function drawPumpkins(ctx: CanvasRenderingContext2D, w: number, h: number): void
       ctx.stroke()
     }
 
-    ctx.fillStyle = '#0d0706'
+    ctx.fillStyle = '#4f5f23'
     ctx.fillRect(-s * 0.08, -s * 1.02, s * 0.16, s * 0.28)
 
-    ctx.fillStyle = 'rgba(255, 184, 92, 0.96)'
+    // Solo los ojos y la boca emiten luz.
+    ctx.save()
+    ctx.shadowColor = 'rgba(255, 170, 66, 0.95)'
+    ctx.shadowBlur = Math.max(3, s * 0.6)
+    ctx.fillStyle = '#ffd98a'
     ctx.beginPath()
     ctx.moveTo(-s * 0.46, -s * 0.18)
     ctx.lineTo(-s * 0.2, -s * 0.32)
@@ -443,6 +446,7 @@ function drawPumpkins(ctx: CanvasRenderingContext2D, w: number, h: number): void
     ctx.lineTo(-s * 0.24, s * 0.38)
     ctx.closePath()
     ctx.fill()
+    ctx.restore()
 
     ctx.restore()
   }
@@ -863,15 +867,6 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
         layer.drawImage(emberSprite, ex - size / 2, ey - size / 2, size, size)
       }
       layer.globalAlpha = 1
-
-      for (const pumpkin of PUMPKINS) {
-        const s = Math.min(width, height) * 0.034 * pumpkin.s
-        const x = pumpkin.x * width
-        const y = pumpkin.y * height
-        const flicker = 0.82 + 0.18 * Math.sin(t * 7 + pumpkin.x * 20)
-        layer.globalAlpha = 0.18 * flicker
-        layer.drawImage(warmGlow, x - s * 3.2, y - s * 3.4, s * 6.4, s * 6.4)
-      }
 
       for (const win of houseWindowGlow(width, height)) {
         const flicker = 0.78 + 0.22 * Math.sin(t * 11 + win.x)
