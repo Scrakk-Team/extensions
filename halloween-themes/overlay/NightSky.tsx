@@ -16,6 +16,7 @@
  */
 
 import { useEffect, useRef, type JSX } from 'react'
+import { BAT_PATH, BAT_VIEWBOX, BAT_WING_ANCHOR, BAT_WING_CLIP } from './batShape'
 
 interface OverlayProps {
   on: (name: string, handler: (payload: unknown) => void) => () => void
@@ -620,6 +621,18 @@ function radialSprite(
 }
 
 /** Murciélago de silueta con alas que baten. */
+let batPath: Path2D | null = null
+
+function getBatPath(): Path2D {
+  if (!batPath) batPath = new Path2D(BAT_PATH)
+  return batPath
+}
+
+/**
+ * Mismo murciélago que el evento: silueta compartida y el mismo recorte de
+ * alas que usa el motor de partículas, para que el cielo y los murciélagos
+ * del timeline se vean idénticos.
+ */
 function drawBat(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -628,65 +641,48 @@ function drawBat(
   flap: number,
   dir: number
 ): void {
-  const f = flap * size * 0.22
+  const path = getBatPath()
+  const [vbW, vbH] = BAT_VIEWBOX
+  const [bodyLeft, bodyRight] = BAT_WING_CLIP
+  const [ax, ay] = BAT_WING_ANCHOR
+  const phase = Math.max(-1, Math.min(1, flap))
+  const wingAngle = phase * 22
+  const wingScale = 1 - 0.38 * (0.5 + 0.5 * phase)
+  const rad = (wingAngle * Math.PI) / 180
+  const s = size / vbH
+
   ctx.save()
   ctx.translate(x, y)
   ctx.scale(dir, 1)
-  ctx.fillStyle = 'rgba(3, 2, 6, 0.9)'
+  ctx.scale(s, s)
+  ctx.translate(-vbW / 2, -vbH / 2)
+  ctx.fillStyle = 'rgba(3, 2, 6, 0.92)'
 
-  ctx.beginPath()
-  ctx.ellipse(0, 0, size * 0.16, size * 0.3, 0, 0, TAU)
-  ctx.fill()
-
-  ctx.beginPath()
-  ctx.arc(0, -size * 0.26, size * 0.11, 0, TAU)
-  ctx.fill()
-
-  ctx.beginPath()
-  ctx.moveTo(-size * 0.1, -size * 0.34)
-  ctx.lineTo(-size * 0.17, -size * 0.52)
-  ctx.lineTo(-size * 0.02, -size * 0.4)
-  ctx.closePath()
-  ctx.fill()
-  ctx.beginPath()
-  ctx.moveTo(size * 0.1, -size * 0.34)
-  ctx.lineTo(size * 0.17, -size * 0.52)
-  ctx.lineTo(size * 0.02, -size * 0.4)
-  ctx.closePath()
-  ctx.fill()
-
-  for (const side of [-1, 1]) {
+  const paintWing = (left: boolean): void => {
+    ctx.save()
     ctx.beginPath()
-    ctx.moveTo(side * size * 0.1, -size * 0.04)
-    ctx.quadraticCurveTo(
-      side * size * 0.32,
-      -size * 0.24 + f,
-      side * size * 0.52,
-      -size * 0.12 + f * 0.8
-    )
-    ctx.quadraticCurveTo(
-      side * size * 0.7,
-      -size * 0.05 + f * 0.7,
-      side * size * 0.94,
-      -size * 0.08 + f * 0.5
-    )
-    ctx.quadraticCurveTo(
-      side * size * 0.78,
-      f * 0.5,
-      side * size * 0.66,
-      size * 0.05 + f * 0.5
-    )
-    ctx.quadraticCurveTo(
-      side * size * 0.5,
-      size * 0.14 + f * 0.4,
-      side * size * 0.3,
-      size * 0.04 + f * 0.3
-    )
-    ctx.quadraticCurveTo(side * size * 0.18, size * 0.14, side * size * 0.1, size * 0.12)
-    ctx.closePath()
-    ctx.fill()
+    if (left) ctx.rect(-vbW, -vbH, bodyLeft + vbW, vbH * 3)
+    else ctx.rect(bodyRight, -vbH, vbW, vbH * 3)
+    ctx.clip()
+    const px = left ? ax : vbW - ax
+    ctx.translate(px, ay)
+    ctx.rotate(left ? rad : -rad)
+    ctx.scale(wingScale, 1)
+    ctx.translate(-px, -ay)
+    ctx.fill(path)
+    ctx.restore()
   }
 
+  const near = phase >= 0
+  if (near) {
+    ctx.fill(path)
+    paintWing(true)
+    paintWing(false)
+  } else {
+    paintWing(true)
+    paintWing(false)
+    ctx.fill(path)
+  }
   ctx.restore()
 }
 
