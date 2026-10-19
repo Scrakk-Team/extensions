@@ -192,7 +192,7 @@ function drawHills(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   }
 }
 
-/** Casona abandonada con dos ventanas encendidas. */
+/** Casona abandonada con dos ventanas apagadas. */
 function drawHouse(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   const s = Math.min(w, h) * 0.11
   const x = w * HOUSE.x
@@ -234,11 +234,8 @@ function drawHouse(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   for (const [wx, wy] of windows) {
     const ww = s * 0.16
     const wh = s * 0.19
-    const lit = ctx.createLinearGradient(wx, wy, wx, wy + wh)
-    lit.addColorStop(0, 'rgba(255, 196, 104, 0.96)')
-    lit.addColorStop(0.55, 'rgba(255, 132, 52, 0.82)')
-    lit.addColorStop(1, 'rgba(120, 42, 24, 0.42)')
-    ctx.fillStyle = lit
+    // Ventana apagada: color plano, sin halo ni degradado brillante.
+    ctx.fillStyle = 'rgba(92, 52, 36, 0.72)'
     ctx.fillRect(wx, wy, ww, wh)
     ctx.strokeStyle = 'rgba(20, 6, 10, 0.92)'
     ctx.lineWidth = Math.max(1, s * 0.018)
@@ -254,7 +251,7 @@ function drawHouse(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   ctx.restore()
 }
 
-/** Capilla lejana con una ventana encendida: segundo punto de luz del horizonte. */
+/** Capilla lejana con una ventana apagada. */
 function drawChapel(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   const s = Math.min(w, h) * 0.085
   const x = w * 0.64
@@ -282,23 +279,31 @@ function drawChapel(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   ctx.lineTo(s * 0.08, -s * 1.38)
   ctx.stroke()
 
-  const lit = ctx.createLinearGradient(0, -s * 0.56, 0, -s * 0.3)
-  lit.addColorStop(0, 'rgba(255, 190, 100, 0.9)')
-  lit.addColorStop(1, 'rgba(120, 50, 25, 0.35)')
-  ctx.fillStyle = lit
+  // Ventana apagada: sin glow.
+  ctx.fillStyle = 'rgba(92, 52, 36, 0.72)'
   ctx.fillRect(-s * 0.055, -s * 0.56, s * 0.11, s * 0.2)
   ctx.restore()
 }
 
-/** Centros de las ventanas, para el parpadeo cálido que se dibuja encima. */
-function houseWindowGlow(w: number, h: number): Array<{ x: number; y: number; r: number }> {
-  const s = Math.min(w, h) * 0.11
-  const x = w * HOUSE.x
-  const y = h * HOUSE.y
-  return [
-    { x: x - s * 0.2, y: y - s * 0.375, r: s * 0.14 },
-    { x: x + s * 0.2, y: y - s * 0.375, r: s * 0.14 }
-  ]
+/** Colina cercana delante de las construcciones: les tapa la base y las ancla. */
+function drawForegroundRidge(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const base = h * 0.852
+  const amp = h * 0.016
+  ctx.beginPath()
+  ctx.moveTo(0, h)
+  ctx.lineTo(0, base)
+  const segments = 6
+  for (let i = 0; i < segments; i += 1) {
+    const x0 = (i / segments) * w
+    const x1 = ((i + 1) / segments) * w
+    const y0 = base - Math.sin(i * 1.3 + 0.9) * amp
+    const y1 = base - Math.sin((i + 1) * 1.3 + 0.9) * amp
+    ctx.quadraticCurveTo((x0 + x1) / 2, Math.min(y0, y1) - amp * 0.35, x1, y1)
+  }
+  ctx.lineTo(w, h)
+  ctx.closePath()
+  ctx.fillStyle = '#060309'
+  ctx.fill()
 }
 
 /** Árbol muerto recursivo: tronco grueso y ramas que se afinan. */
@@ -573,6 +578,7 @@ function paintBackdrop(
   drawDistantGraveyard(ctx, w, h)
   drawChapel(ctx, w, h)
   drawHouse(ctx, w, h)
+  drawForegroundRidge(ctx, w, h)
 
   const unit = Math.min(w, h)
   drawTree(ctx, w * 0.055, h * 0.895, unit * 0.32, 11, 0.06)
@@ -775,11 +781,6 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
       [0.5, 'rgba(78, 72, 98, 0.5)'],
       [1, 'rgba(30, 22, 38, 0)']
     ])
-    const warmGlow = radialSprite(64, [
-      [0, 'rgba(255, 190, 100, 1)'],
-      [0.45, 'rgba(255, 130, 50, 0.5)'],
-      [1, 'rgba(255, 80, 20, 0)']
-    ])
 
     let width = 1
     let height = 1
@@ -943,18 +944,6 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
       }
       layer.globalAlpha = 1
 
-      for (const win of houseWindowGlow(width, height)) {
-        const flicker = 0.78 + 0.22 * Math.sin(t * 11 + win.x)
-        layer.globalAlpha = 0.2 * flicker
-        layer.drawImage(
-          warmGlow,
-          win.x - win.r * 3.4,
-          win.y - win.r * 3.4,
-          win.r * 6.8,
-          win.r * 6.8
-        )
-      }
-      layer.globalAlpha = 1
       layer.restore()
 
       if (softCtx) ctx.drawImage(soft, 0, 0, width, height)
