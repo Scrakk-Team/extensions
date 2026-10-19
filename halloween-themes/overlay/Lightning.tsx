@@ -607,7 +607,7 @@ export default function Lightning({
       gl.uniform1f(uniforms.uXOffset, s.xOffset)
       gl.uniform1f(uniforms.uAngle, (s.angle * Math.PI) / 180)
       gl.uniform1f(uniforms.uSpread, s.spread)
-      gl.uniform1i(uniforms.uBolts, Math.min(MAX_BOLTS, Math.max(1, Math.round(s.bolts))))
+      gl.uniform1i(uniforms.uBolts, Math.min(MAX_BOLTS, Math.max(0, Math.round(s.bolts))))
       gl.uniform4f(uniforms.uPointer, px, py, pointer.presence, Math.max(0, s.mouseStrength))
       gl.uniform4fv(uniforms.uStrikes, strikeData)
       gl.uniform4fv(uniforms.uStrikeInfo, infoData)
@@ -762,12 +762,19 @@ export default function Lightning({
       const anchor = (payload as { anchor?: { x: number; y: number } } | undefined)?.anchor
       if (!anchor) return
       // El canvas cubre TODA la pantalla: el rayo nace siempre arriba y lo que
-      // se mueve es la PUNTA, que aterriza en el ancla (igual que el bend hacia
-      // el cursor del componente original).
+      // se mueve es la PUNTA. El evento manda un ancla (`lowest`), pero si
+      // cayera siempre en el mismo píxel se leería como hardcodeado: cada
+      // descarga aterriza en un punto distinto cerca del ancla. El click no
+      // pasa por acá, así que sigue cayendo exactamente donde clickeaste.
+      const spread = view.width * 0.26
+      const landingX = Math.min(
+        view.width,
+        Math.max(0, anchor.x + (Math.random() * 2 - 1) * spread)
+      )
       setVisible(true)
       window.clearTimeout(hideTimer)
       hideTimer = window.setTimeout(() => setVisible(false), 1800)
-      strikeAtScreen(anchor.x, anchor.y)
+      strikeAtScreen(landingX, anchor.y)
     })
 
 
