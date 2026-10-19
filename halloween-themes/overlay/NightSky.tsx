@@ -403,10 +403,10 @@ function drawDistantGraveyard(ctx: CanvasRenderingContext2D, w: number, h: numbe
     ctx.save()
     ctx.translate(x, y)
     ctx.rotate(tilt)
-    ctx.fillStyle = '#0a0610'
-    ctx.strokeStyle = 'rgba(132, 86, 104, 0.3)'
-    ctx.lineWidth = Math.max(0.6, unit * 0.0015)
+    ctx.fillStyle = '#050208'
     if (i % 4 === 2) {
+      ctx.strokeStyle = 'rgba(7, 4, 10, 0.95)'
+      ctx.lineWidth = Math.max(0.6, unit * 0.0015)
       ctx.beginPath()
       ctx.moveTo(0, 0)
       ctx.lineTo(0, -sh)
@@ -422,7 +422,6 @@ function drawDistantGraveyard(ctx: CanvasRenderingContext2D, w: number, h: numbe
       ctx.lineTo(sw / 2, 0)
       ctx.closePath()
       ctx.fill()
-      ctx.stroke()
     }
     ctx.restore()
   }
