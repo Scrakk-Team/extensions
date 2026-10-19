@@ -346,39 +346,82 @@ function drawTree(
   ctx.restore()
 }
 
-/** Lápidas y cruces inclinadas: silueta, no gore. */
-function drawGraveyard(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+/**
+ * Mini cementerio lejano sobre la ladera: lápidas pequeñas, una cruz y un
+ * panteón. Reemplaza las lápidas gigantes del primer plano, que quedaban
+ * tapadas por la niebla y los paneles.
+ */
+function drawDistantGraveyard(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   const rng = mulberry32(99)
-  const base = h * 0.955
   const unit = Math.min(w, h)
+  const base = h * 0.802
+  const left = w * 0.415
+  const span = w * 0.155
 
+  // Cerca baja de hierro.
+  ctx.save()
+  ctx.strokeStyle = 'rgba(9, 5, 12, 0.95)'
+  ctx.lineWidth = Math.max(0.7, unit * 0.0018)
   for (let i = 0; i < 9; i += 1) {
-    const x = w * (0.055 + i * 0.108 + rng() * 0.018)
-    const sw = unit * (0.024 + rng() * 0.018)
-    const sh = sw * (1.1 + rng() * 0.7)
-    const tilt = (rng() - 0.5) * 0.2
-    ctx.save()
-    ctx.translate(x, base - sh * 0.3)
-    ctx.rotate(tilt)
-    ctx.fillStyle = '#0b0710'
-    ctx.strokeStyle = 'rgba(138, 72, 88, 0.24)'
-    ctx.lineWidth = 1
+    const x = left + (span * i) / 8
     ctx.beginPath()
-    ctx.moveTo(-sw / 2, 0)
-    ctx.lineTo(-sw / 2, -sh * 0.65)
-    ctx.quadraticCurveTo(-sw / 2, -sh, 0, -sh)
-    ctx.quadraticCurveTo(sw / 2, -sh, sw / 2, -sh * 0.65)
-    ctx.lineTo(sw / 2, 0)
-    ctx.closePath()
-    ctx.fill()
+    ctx.moveTo(x, base)
+    ctx.lineTo(x, base - unit * 0.03)
     ctx.stroke()
-    if (i % 3 === 1) {
-      ctx.strokeStyle = 'rgba(90, 45, 60, 0.55)'
+  }
+  ctx.beginPath()
+  ctx.moveTo(left, base - unit * 0.019)
+  ctx.lineTo(left + span, base - unit * 0.019)
+  ctx.stroke()
+  ctx.restore()
+
+  // Panteón: el punto más alto del cementerio.
+  const cryptX = left + span * 0.64
+  const cryptY = base - unit * 0.004
+  const cs = unit * 0.046
+  ctx.save()
+  ctx.translate(cryptX, cryptY)
+  ctx.fillStyle = '#09050d'
+  ctx.fillRect(-cs * 0.3, -cs * 0.55, cs * 0.6, cs * 0.55)
+  ctx.beginPath()
+  ctx.moveTo(-cs * 0.38, -cs * 0.55)
+  ctx.lineTo(0, -cs * 0.92)
+  ctx.lineTo(cs * 0.38, -cs * 0.55)
+  ctx.closePath()
+  ctx.fill()
+  ctx.fillStyle = '#040207'
+  ctx.fillRect(-cs * 0.08, -cs * 0.27, cs * 0.16, cs * 0.27)
+  ctx.restore()
+
+  // Lápidas chicas y alguna cruz.
+  for (let i = 0; i < 8; i += 1) {
+    const x = left + span * (0.05 + i * 0.115) + (rng() - 0.5) * unit * 0.008
+    const sw = unit * (0.008 + rng() * 0.006)
+    const sh = sw * (1.2 + rng() * 0.85)
+    const y = base - sh * 0.12 + (rng() - 0.5) * unit * 0.006
+    const tilt = (rng() - 0.5) * 0.18
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    ctx.fillStyle = '#0a0610'
+    ctx.strokeStyle = 'rgba(132, 86, 104, 0.3)'
+    ctx.lineWidth = Math.max(0.6, unit * 0.0015)
+    if (i % 4 === 2) {
       ctx.beginPath()
-      ctx.moveTo(0, -sh * 0.82)
-      ctx.lineTo(0, -sh * 0.42)
-      ctx.moveTo(-sw * 0.2, -sh * 0.68)
-      ctx.lineTo(sw * 0.2, -sh * 0.68)
+      ctx.moveTo(0, 0)
+      ctx.lineTo(0, -sh)
+      ctx.moveTo(-sw * 0.22, -sh * 0.74)
+      ctx.lineTo(sw * 0.22, -sh * 0.74)
+      ctx.stroke()
+    } else {
+      ctx.beginPath()
+      ctx.moveTo(-sw / 2, 0)
+      ctx.lineTo(-sw / 2, -sh * 0.62)
+      ctx.quadraticCurveTo(-sw / 2, -sh, 0, -sh)
+      ctx.quadraticCurveTo(sw / 2, -sh, sw / 2, -sh * 0.62)
+      ctx.lineTo(sw / 2, 0)
+      ctx.closePath()
+      ctx.fill()
       ctx.stroke()
     }
     ctx.restore()
@@ -397,12 +440,34 @@ function drawPumpkins(ctx: CanvasRenderingContext2D, w: number, h: number): void
     ctx.save()
     ctx.translate(x, y)
 
+    // Sombra proyectada en el suelo: le da peso a la calabaza.
+    ctx.save()
+    ctx.translate(0, s * 0.72)
+    ctx.scale(1, 0.3)
+    const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, s * 1.35)
+    shadow.addColorStop(0, 'rgba(0, 0, 0, 0.55)')
+    shadow.addColorStop(0.55, 'rgba(0, 0, 0, 0.3)')
+    shadow.addColorStop(1, 'rgba(0, 0, 0, 0)')
+    ctx.fillStyle = shadow
+    ctx.fillRect(-s * 1.4, -s * 1.4, s * 2.8, s * 2.8)
+    ctx.restore()
+
     // Cuerpo naranja: sin halo alrededor; la luz sale solo de la cara.
     const body = ctx.createLinearGradient(-s * 0.8, -s * 0.9, s * 0.8, s)
     body.addColorStop(0, '#f5a24e')
     body.addColorStop(0.45, '#dd6f2c')
     body.addColorStop(1, '#9e3c17')
     ctx.fillStyle = body
+    ctx.beginPath()
+    ctx.ellipse(0, 0, s, s * 0.78, 0, 0, TAU)
+    ctx.fill()
+
+    // Volumen: luz arriba a la izquierda, sombra abajo a la derecha.
+    const shade = ctx.createRadialGradient(-s * 0.32, -s * 0.42, s * 0.06, 0, 0, s * 1.05)
+    shade.addColorStop(0, 'rgba(255, 210, 140, 0.3)')
+    shade.addColorStop(0.42, 'rgba(255, 150, 70, 0.02)')
+    shade.addColorStop(1, 'rgba(40, 7, 0, 0.62)')
+    ctx.fillStyle = shade
     ctx.beginPath()
     ctx.ellipse(0, 0, s, s * 0.78, 0, 0, TAU)
     ctx.fill()
@@ -415,6 +480,17 @@ function drawPumpkins(ctx: CanvasRenderingContext2D, w: number, h: number): void
       ctx.stroke()
     }
 
+    // Reflejo tenue en el lomo izquierdo.
+    ctx.strokeStyle = 'rgba(255, 214, 150, 0.22)'
+    ctx.lineWidth = Math.max(1, s * 0.04)
+    ctx.beginPath()
+    ctx.ellipse(-s * 0.4, -s * 0.04, s * 0.2, s * 0.54, 0, Math.PI * 0.62, Math.PI * 1.38)
+    ctx.stroke()
+
+    ctx.fillStyle = 'rgba(40, 10, 5, 0.38)'
+    ctx.beginPath()
+    ctx.ellipse(0, -s * 0.72, s * 0.19, s * 0.06, 0, 0, TAU)
+    ctx.fill()
     ctx.fillStyle = '#4f5f23'
     ctx.fillRect(-s * 0.08, -s * 1.02, s * 0.16, s * 0.28)
 
@@ -495,6 +571,7 @@ function paintBackdrop(
 
   drawMoon(ctx, w, h)
   drawHills(ctx, w, h)
+  drawDistantGraveyard(ctx, w, h)
   drawChapel(ctx, w, h)
   drawHouse(ctx, w, h)
 
@@ -503,7 +580,6 @@ function paintBackdrop(
   drawTree(ctx, w * 0.31, h * 0.875, unit * 0.24, 29, -0.08)
   drawTree(ctx, w * 0.965, h * 0.965, unit * 0.82, 73, -0.24)
 
-  drawGraveyard(ctx, w, h)
   drawPumpkins(ctx, w, h)
 
   const vignette = ctx.createRadialGradient(
