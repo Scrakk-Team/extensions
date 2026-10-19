@@ -673,15 +673,27 @@ function drawBat(
     ctx.restore()
   }
 
+  // El path completo incluye las alas; si se dibuja entero queda una silueta
+  // estática debajo de las alas que se mueven (el "murciélago doble"). El
+  // cuerpo es solo la franja central entre los dos cortes.
+  const paintBody = (): void => {
+    ctx.save()
+    ctx.beginPath()
+    ctx.rect(bodyLeft, -vbH, bodyRight - bodyLeft, vbH * 3)
+    ctx.clip()
+    ctx.fill(path)
+    ctx.restore()
+  }
+
   const near = phase >= 0
   if (near) {
-    ctx.fill(path)
+    paintBody()
     paintWing(true)
     paintWing(false)
   } else {
     paintWing(true)
     paintWing(false)
-    ctx.fill(path)
+    paintBody()
   }
   ctx.restore()
 }
