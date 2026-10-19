@@ -766,10 +766,14 @@ export default function Lightning({
       // cayera siempre en el mismo píxel se leería como hardcodeado: cada
       // descarga aterriza en un punto distinto cerca del ancla. El click no
       // pasa por acá, así que sigue cayendo exactamente donde clickeaste.
-      const spread = view.width * 0.26
+      const canvasWidth = view.width > 1 ? view.width : window.innerWidth
+      const direction = Math.random() > 0.5 ? 1 : -1
       const landingX = Math.min(
-        view.width,
-        Math.max(0, anchor.x + (Math.random() * 2 - 1) * spread)
+        canvasWidth,
+        Math.max(
+          0,
+          anchor.x + direction * (0.12 + Math.random() * 0.24) * canvasWidth
+        )
       )
       setVisible(true)
       window.clearTimeout(hideTimer)
