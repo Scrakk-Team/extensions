@@ -25,10 +25,6 @@
       "file": "assets/trueno.ogg",
       "gain": 0.55
     },
-    "lobo": {
-      "file": "assets/lobo.ogg",
-      "gain": 0.4
-    },
     "cuervo": {
       "file": "assets/cuervo.ogg",
       "gain": 0.45
@@ -45,11 +41,6 @@
       "op": "audio.ambience",
       "sound": "tormenta",
       "fade": 1500
-    },
-    {
-      "at": 250,
-      "op": "audio.play",
-      "sound": "lobo"
     },
     {
       "at": 400,
