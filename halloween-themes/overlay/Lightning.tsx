@@ -711,15 +711,6 @@ export default function Lightning({
       strikeAtScreen(event.clientX, event.clientY)
     }
 
-    // Un click también hace caer un rayo DONDE clickeaste (el componente lo
-    // mapea solo con `clickStrike`); acá sólo se muestra el canvas.
-    const onPointerDown = (): void => {
-      setVisible(true)
-      window.clearTimeout(hideTimer)
-      hideTimer = window.setTimeout(() => setVisible(false), 1800)
-    }
-
-    window.addEventListener('pointerdown', onPointerDown, { passive: true })
     window.addEventListener('pointermove', onMove, { passive: true })
     window.addEventListener('pointerdown', onDown, { passive: true })
     window.addEventListener('pointerout', onLeave)
@@ -758,14 +749,36 @@ export default function Lightning({
     // El PACK decide qué hacer con los eventos del timeline: el core sólo dice
     // "llegó `strike`" con un ancla en pantalla.
     let hideTimer: number | undefined
+    let randomTimer: number | undefined
+
+    const triggerStrike = (x: number, y: number): void => {
+      setVisible(true)
+      window.clearTimeout(hideTimer)
+      hideTimer = window.setTimeout(() => setVisible(false), 1800)
+      strikeAtScreen(x, y)
+    }
+
+    /** Rayos que caen solos, en tiempos y posiciones al azar. */
+    const scheduleRandomStrike = (delay: number): void => {
+      if (reduced || disposed) return
+      randomTimer = window.setTimeout(() => {
+        if (disposed) return
+        if (!document.hidden) {
+          const w = view.width > 1 ? view.width : window.innerWidth
+          const h = view.height > 1 ? view.height : window.innerHeight
+          triggerStrike(w * (0.1 + Math.random() * 0.8), h * (0.7 + Math.random() * 0.2))
+        }
+        scheduleRandomStrike(6000 + Math.random() * 9000)
+      }, delay)
+    }
+
     const offStrike = on('strike', (payload) => {
       const anchor = (payload as { anchor?: { x: number; y: number } } | undefined)?.anchor
       if (!anchor) return
       // El canvas cubre TODA la pantalla: el rayo nace siempre arriba y lo que
       // se mueve es la PUNTA. El evento manda un ancla (`lowest`), pero si
       // cayera siempre en el mismo píxel se leería como hardcodeado: cada
-      // descarga aterriza en un punto distinto cerca del ancla. El click no
-      // pasa por acá, así que sigue cayendo exactamente donde clickeaste.
+      // descarga aterriza en un punto distinto cerca del ancla.
       const canvasWidth = view.width > 1 ? view.width : window.innerWidth
       const direction = Math.random() > 0.5 ? 1 : -1
       const landingX = Math.min(
@@ -775,21 +788,20 @@ export default function Lightning({
           anchor.x + direction * (0.12 + Math.random() * 0.24) * canvasWidth
         )
       )
-      setVisible(true)
-      window.clearTimeout(hideTimer)
-      hideTimer = window.setTimeout(() => setVisible(false), 1800)
-      strikeAtScreen(landingX, anchor.y)
+      triggerStrike(landingX, anchor.y)
     })
+
+    scheduleRandomStrike(3500 + Math.random() * 3500)
 
 
     return () => {
       disposed = true
       window.clearTimeout(hideTimer)
+      window.clearTimeout(randomTimer)
       offStrike()
       cancelAnimationFrame(raf)
       resizeObserver.disconnect()
       visibilityObserver.disconnect()
-      window.removeEventListener('pointerdown', onPointerDown)
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointerout', onLeave)

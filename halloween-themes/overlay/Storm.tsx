@@ -26,10 +26,11 @@ export default function Storm({ on }: OverlayProps): JSX.Element {
       <NightSky on={on} />
       {/*
         `bolts={0}`: sin rayo ambiental permanente. El rayo sólo existe cuando
-        cae una descarga (el `strike` del evento o un click), así que un click
-        no suma una segunda descarga fija en el centro.
+        cae una descarga (el `strike` del evento o una descarga aleatoria).
+        `clickStrike={false}`: el click no dispara nada; los rayos llegan en
+        tiempos y posiciones al azar.
       */}
-      <Lightning bolts={0} on={on} />
+      <Lightning bolts={0} clickStrike={false} on={on} />
     </>
   )
 }
