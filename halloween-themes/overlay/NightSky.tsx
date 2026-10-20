@@ -90,7 +90,7 @@ interface RainDrop {
 const TAU = Math.PI * 2
 const MOON = { x: 0.76, y: 0.19, r: 0.072 }
 const HOUSE = { x: 0.17, y: 0.845 }
-const PUMPKINS = [{ x: 0.945, y: 0.95, s: 0.95 }]
+const PUMPKINS = [{ x: 0.945, y: 0.866, s: 0.95 }]
 
 /** PRNG determinista: la escena no cambia entre recargas ni entre equipos. */
 function mulberry32(seed: number): () => number {
@@ -110,20 +110,20 @@ function drawMoon(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   const my = h * MOON.y
   const r = Math.min(w, h) * MOON.r
 
-  const halo = ctx.createRadialGradient(mx, my, r * 0.2, mx, my, r * 5)
-  halo.addColorStop(0, 'rgba(255, 186, 132, 0.32)')
-  halo.addColorStop(0.28, 'rgba(214, 84, 54, 0.15)')
-  halo.addColorStop(0.62, 'rgba(120, 30, 38, 0.045)')
-  halo.addColorStop(1, 'rgba(40, 8, 14, 0)')
+  const halo = ctx.createRadialGradient(mx, my, r * 0.3, mx, my, r * 3.4)
+  halo.addColorStop(0, 'rgba(214, 228, 255, 0.2)')
+  halo.addColorStop(0.32, 'rgba(164, 184, 228, 0.09)')
+  halo.addColorStop(0.68, 'rgba(96, 116, 164, 0.025)')
+  halo.addColorStop(1, 'rgba(20, 30, 60, 0)')
   ctx.fillStyle = halo
-  ctx.fillRect(mx - r * 5, my - r * 5, r * 10, r * 10)
+  ctx.fillRect(mx - r * 3.4, my - r * 3.4, r * 6.8, r * 6.8)
 
   const disk = ctx.createRadialGradient(mx - r * 0.35, my - r * 0.42, r * 0.05, mx, my, r)
-  disk.addColorStop(0, '#fff0c9')
-  disk.addColorStop(0.38, '#ffd39a')
-  disk.addColorStop(0.72, '#e39a64')
-  disk.addColorStop(0.92, '#b9533f')
-  disk.addColorStop(1, '#7f2a2d')
+  disk.addColorStop(0, '#ffffff')
+  disk.addColorStop(0.38, '#eef3ff')
+  disk.addColorStop(0.72, '#c9d4ee')
+  disk.addColorStop(0.92, '#9caaca')
+  disk.addColorStop(1, '#7e8cad')
   ctx.beginPath()
   ctx.arc(mx, my, r, 0, TAU)
   ctx.fillStyle = disk
@@ -144,8 +144,8 @@ function drawMoon(ctx: CanvasRenderingContext2D, w: number, h: number): void {
       cy,
       crater
     )
-    craterFill.addColorStop(0, 'rgba(92, 32, 34, 0.3)')
-    craterFill.addColorStop(1, 'rgba(120, 50, 45, 0)')
+    craterFill.addColorStop(0, 'rgba(92, 108, 142, 0.3)')
+    craterFill.addColorStop(1, 'rgba(126, 142, 178, 0)')
     ctx.beginPath()
     ctx.arc(cx, cy, crater, 0, TAU)
     ctx.fillStyle = craterFill
@@ -153,8 +153,8 @@ function drawMoon(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   }
 
   const rim = ctx.createRadialGradient(mx, my, r * 0.72, mx, my, r)
-  rim.addColorStop(0, 'rgba(40, 8, 12, 0)')
-  rim.addColorStop(1, 'rgba(30, 5, 10, 0.48)')
+  rim.addColorStop(0, 'rgba(30, 40, 70, 0)')
+  rim.addColorStop(1, 'rgba(26, 34, 58, 0.42)')
   ctx.beginPath()
   ctx.arc(mx, my, r, 0, TAU)
   ctx.fillStyle = rim
@@ -575,13 +575,15 @@ function paintBackdrop(
   drawDistantGraveyard(ctx, w, h)
   drawChapel(ctx, w, h)
   drawHouse(ctx, w, h)
-  drawForegroundRidge(ctx, w, h)
 
   const unit = Math.min(w, h)
   drawTree(ctx, w * 0.055, h * 0.895, unit * 0.32, 11, 0.06)
   drawTree(ctx, w * 0.31, h * 0.875, unit * 0.24, 29, -0.08)
   drawTree(ctx, w * 0.91, h * 0.965, unit * 0.82, 73, -0.24)
 
+  // La colina cercana tapa el pie de los árboles y las construcciones: nacen
+  // detrás de la montaña en vez de quedar flotando sobre ella.
+  drawForegroundRidge(ctx, w, h)
   drawPumpkins(ctx, w, h)
 
   const vignette = ctx.createRadialGradient(
@@ -614,6 +616,53 @@ function radialSprite(
     ctx.fillRect(0, 0, size, size)
   }
   return sprite
+}
+
+/**
+ * Textura de niebla repetible en horizontal: las bolas que cruzan un borde se
+ * dibujan también al otro lado, así el tile no tiene costura y puede desplazarse
+ * a la derecha para siempre sin que aparezca un hueco.
+ */
+function makeFogTexture(seed: number): HTMLCanvasElement {
+  const w = 512
+  const h = 256
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return canvas
+  const rng = mulberry32(seed)
+
+  for (let i = 0; i < 24; i += 1) {
+    const x = rng() * w
+    const y = h * (0.3 + rng() * 0.38)
+    const r = h * (0.16 + rng() * 0.24)
+    const a = 0.1 + rng() * 0.09
+    for (const dx of [-w, 0, w]) {
+      const g = ctx.createRadialGradient(x + dx, y, 0, x + dx, y, r)
+      g.addColorStop(0, `rgba(128, 138, 162, ${a})`)
+      g.addColorStop(0.55, `rgba(82, 76, 102, ${a * 0.55})`)
+      g.addColorStop(1, 'rgba(30, 22, 38, 0)')
+      ctx.fillStyle = g
+      ctx.fillRect(x + dx - r, y - r, r * 2, r * 2)
+    }
+  }
+
+  // Base muy tenue: garantiza una bruma continua entre las bolas.
+  ctx.fillStyle = 'rgba(96, 106, 132, 0.05)'
+  ctx.fillRect(0, 0, w, h)
+
+  // Funde arriba y abajo para que la capa no tenga un borde duro.
+  ctx.globalCompositeOperation = 'destination-in'
+  const fade = ctx.createLinearGradient(0, 0, 0, h)
+  fade.addColorStop(0, 'rgba(0, 0, 0, 0)')
+  fade.addColorStop(0.28, 'rgba(0, 0, 0, 1)')
+  fade.addColorStop(0.78, 'rgba(0, 0, 0, 1)')
+  fade.addColorStop(1, 'rgba(0, 0, 0, 0)')
+  ctx.fillStyle = fade
+  ctx.fillRect(0, 0, w, h)
+  ctx.globalCompositeOperation = 'source-over'
+  return canvas
 }
 
 /** Murciélago de silueta con alas que baten. */
@@ -780,11 +829,36 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
       [0.55, 'rgba(64, 40, 52, 0.55)'],
       [1, 'rgba(12, 5, 12, 0)']
     ])
-    const fogSprite = radialSprite(192, [
-      [0, 'rgba(132, 142, 166, 1)'],
-      [0.5, 'rgba(78, 72, 98, 0.5)'],
-      [1, 'rgba(30, 22, 38, 0)']
-    ])
+    const fogTextures = [makeFogTexture(0x1a2b), makeFogTexture(0x3c4d)]
+    const fogLayers = [
+      {
+        texture: fogTextures[0],
+        y: 0.775,
+        height: 0.23,
+        scale: 0.44,
+        alpha: 0.4,
+        speed: 0.018,
+        phase: 0
+      },
+      {
+        texture: fogTextures[1],
+        y: 0.86,
+        height: 0.2,
+        scale: 0.52,
+        alpha: 0.48,
+        speed: 0.028,
+        phase: 0.37
+      },
+      {
+        texture: fogTextures[0],
+        y: 0.93,
+        height: 0.16,
+        scale: 0.6,
+        alpha: 0.36,
+        speed: 0.04,
+        phase: 0.71
+      }
+    ]
 
     let width = 1
     let height = 1
@@ -905,25 +979,15 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
       layer.fillStyle = ground
       layer.fillRect(0, height * 0.8, width, height * 0.2)
 
-      const fogLayers = [
-        { y: 0.8, speed: 0.004, alpha: 0.09, phase: 0.2, scale: 0.36, squash: 0.22 },
-        { y: 0.88, speed: -0.003, alpha: 0.11, phase: 2.4, scale: 0.44, squash: 0.2 },
-        { y: 0.95, speed: 0.006, alpha: 0.14, phase: 4.1, scale: 0.52, squash: 0.18 }
-      ]
+      // Niebla continua: se repite en horizontal y avanza siempre a la derecha.
+      // Al cubrir de borde a borde no hay momento en que desaparezca.
       for (const fogLayer of fogLayers) {
-        for (let i = 0; i < 3; i += 1) {
-          const x = (((i * 0.39 + t * fogLayer.speed + fogLayer.phase) % 1.5) - 0.25) * width
-          const y =
-            fogLayer.y * height + Math.sin(t * 0.22 + i + fogLayer.phase) * height * 0.006
-          const r = width * fogLayer.scale
-          layer.globalAlpha = fogLayer.alpha
-          layer.drawImage(
-            fogSprite,
-            x - r,
-            y - r * fogLayer.squash,
-            r * 2,
-            r * 2 * fogLayer.squash
-          )
+        const tileW = Math.max(280, width * fogLayer.scale)
+        const tileH = height * fogLayer.height
+        const offset = (t * fogLayer.speed * tileW + fogLayer.phase * tileW) % tileW
+        layer.globalAlpha = fogLayer.alpha
+        for (let x = offset - tileW; x < width; x += tileW) {
+          layer.drawImage(fogLayer.texture, x, fogLayer.y * height, tileW, tileH)
         }
       }
       layer.globalAlpha = 1
