@@ -758,18 +758,38 @@ export default function Lightning({
       strikeAtScreen(x, y)
     }
 
-    /** Rayos que caen solos, en tiempos y posiciones al azar. */
-    const scheduleRandomStrike = (delay: number): void => {
+    /**
+     * Cadencia realista, no un rango fijo: proceso de Poisson (intervalos
+     * exponenciales) con ráfagas cortas. La telemetría de descargas en células
+     * activas muestra intervalos medianos de 0.12–0.53 s y colas de decenas de
+     * segundos; por eso alternamos ráfagas de 0.2–1.1 s con una media de ~12 s
+     * entre células, en vez de un "cada 6–15 s".
+     */
+    let burst = 0
+    const nextGap = (): number => {
+      if (burst > 0) {
+        burst -= 1
+        return 180 + Math.random() * 900
+      }
+      const gap = -Math.log(1 - Math.random()) * 12000
+      if (Math.random() < 0.18) burst = 1 + Math.floor(Math.random() * 3)
+      return Math.max(120, gap)
+    }
+
+    const scheduleRandomStrike = (): void => {
       if (reduced || disposed) return
       randomTimer = window.setTimeout(() => {
         if (disposed) return
         if (!document.hidden) {
           const w = view.width > 1 ? view.width : window.innerWidth
           const h = view.height > 1 ? view.height : window.innerHeight
-          triggerStrike(w * (0.1 + Math.random() * 0.8), h * (0.7 + Math.random() * 0.2))
+          triggerStrike(
+            w * (0.08 + Math.random() * 0.84),
+            h * (0.66 + Math.random() * 0.24)
+          )
         }
-        scheduleRandomStrike(6000 + Math.random() * 9000)
-      }, delay)
+        scheduleRandomStrike()
+      }, nextGap())
     }
 
     const offStrike = on('strike', (payload) => {
@@ -791,7 +811,7 @@ export default function Lightning({
       triggerStrike(landingX, anchor.y)
     })
 
-    scheduleRandomStrike(3500 + Math.random() * 3500)
+    scheduleRandomStrike()
 
 
     return () => {

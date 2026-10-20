@@ -54,22 +54,6 @@ interface Ember {
   alpha: number
 }
 
-interface CloudBlob {
-  x: number
-  y: number
-  r: number
-  alpha: number
-}
-
-interface CloudBand {
-  y: number
-  speed: number
-  scale: number
-  alpha: number
-  phase: number
-  blobs: CloudBlob[]
-}
-
 interface Meteor {
   x: number
   y: number
@@ -90,7 +74,7 @@ interface RainDrop {
 const TAU = Math.PI * 2
 const MOON = { x: 0.76, y: 0.19, r: 0.072 }
 const HOUSE = { x: 0.17, y: 0.845 }
-const PUMPKINS = [{ x: 0.945, y: 0.866, s: 0.95 }]
+const PUMPKINS = [{ x: 0.945, y: 0.815, s: 0.95 }]
 
 /** PRNG determinista: la escena no cambia entre recargas ni entre equipos. */
 function mulberry32(seed: number): () => number {
@@ -530,21 +514,27 @@ function drawPumpkins(ctx: CanvasRenderingContext2D, w: number, h: number): void
 }
 
 /** Pinta la capa estática en un canvas aparte: sólo se repinta al redimensionar. */
-function paintBackdrop(
+function prepareLayer(
   canvas: HTMLCanvasElement,
   w: number,
   h: number,
   dpr: number
-): void {
+): CanvasRenderingContext2D | null {
   const pw = Math.max(1, Math.round(w * dpr))
   const ph = Math.max(1, Math.round(h * dpr))
   if (canvas.width !== pw) canvas.width = pw
   if (canvas.height !== ph) canvas.height = ph
   const ctx = canvas.getContext('2d')
-  if (!ctx) return
-
+  if (!ctx) return null
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   ctx.clearRect(0, 0, w, h)
+  return ctx
+}
+
+/** Cielo + luna. Las nubes se dibujan encima de esta capa. */
+function paintSky(canvas: HTMLCanvasElement, w: number, h: number, dpr: number): void {
+  const ctx = prepareLayer(canvas, w, h, dpr)
+  if (!ctx) return
 
   const sky = ctx.createLinearGradient(0, 0, 0, h)
   sky.addColorStop(0, '#04050b')
@@ -571,6 +561,30 @@ function paintBackdrop(
   ctx.fillRect(0, 0, w, h)
 
   drawMoon(ctx, w, h)
+
+  const vignette = ctx.createRadialGradient(
+    w * 0.5,
+    h * 0.45,
+    Math.min(w, h) * 0.2,
+    w * 0.5,
+    h * 0.5,
+    Math.max(w, h) * 0.78
+  )
+  vignette.addColorStop(0, 'rgba(0, 0, 0, 0)')
+  vignette.addColorStop(1, 'rgba(0, 0, 0, 0.46)')
+  ctx.fillStyle = vignette
+  ctx.fillRect(0, 0, w, h)
+}
+
+/**
+ * Todo el paisaje sólido: cerros, cementerio, capilla, casa, árboles y
+ * calabaza. Es una capa con el cielo TRANSPARENTE, así las nubes quedan
+ * detrás de los árboles y las montañas.
+ */
+function paintForeground(canvas: HTMLCanvasElement, w: number, h: number, dpr: number): void {
+  const ctx = prepareLayer(canvas, w, h, dpr)
+  if (!ctx) return
+
   drawHills(ctx, w, h)
   drawDistantGraveyard(ctx, w, h)
   drawChapel(ctx, w, h)
@@ -585,19 +599,6 @@ function paintBackdrop(
   // detrás de la montaña en vez de quedar flotando sobre ella.
   drawForegroundRidge(ctx, w, h)
   drawPumpkins(ctx, w, h)
-
-  const vignette = ctx.createRadialGradient(
-    w * 0.5,
-    h * 0.45,
-    Math.min(w, h) * 0.2,
-    w * 0.5,
-    h * 0.5,
-    Math.max(w, h) * 0.78
-  )
-  vignette.addColorStop(0, 'rgba(0, 0, 0, 0)')
-  vignette.addColorStop(1, 'rgba(0, 0, 0, 0.46)')
-  ctx.fillStyle = vignette
-  ctx.fillRect(0, 0, w, h)
 }
 
 /** Sprite radial reutilizable: evita crear gradientes en cada frame. */
@@ -658,6 +659,52 @@ function makeFogTexture(seed: number): HTMLCanvasElement {
   fade.addColorStop(0, 'rgba(0, 0, 0, 0)')
   fade.addColorStop(0.28, 'rgba(0, 0, 0, 1)')
   fade.addColorStop(0.78, 'rgba(0, 0, 0, 1)')
+  fade.addColorStop(1, 'rgba(0, 0, 0, 0)')
+  ctx.fillStyle = fade
+  ctx.fillRect(0, 0, w, h)
+  ctx.globalCompositeOperation = 'source-over'
+  return canvas
+}
+
+/**
+ * Manto de nubes repetible: puffs alargados, no bolitas sueltas. Se dibuja
+ * antes del foreground, así los árboles y las montañas siempre quedan delante.
+ */
+function makeCloudTexture(seed: number): HTMLCanvasElement {
+  const w = 1024
+  const h = 320
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return canvas
+  const rng = mulberry32(seed)
+
+  for (let i = 0; i < 18; i += 1) {
+    const x = rng() * w
+    const y = h * (0.22 + rng() * 0.56)
+    const rw = h * (0.22 + rng() * 0.38)
+    const rh = h * (0.09 + rng() * 0.14)
+    const a = 0.16 + rng() * 0.12
+    for (const dx of [-w, 0, w]) {
+      ctx.save()
+      ctx.translate(x + dx, y)
+      ctx.scale(1, rh / rw)
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rw)
+      g.addColorStop(0, `rgba(86, 76, 108, ${a})`)
+      g.addColorStop(0.55, `rgba(48, 40, 66, ${a * 0.55})`)
+      g.addColorStop(1, 'rgba(18, 14, 30, 0)')
+      ctx.fillStyle = g
+      ctx.fillRect(-rw, -rw, rw * 2, rw * 2)
+      ctx.restore()
+    }
+  }
+
+  ctx.globalCompositeOperation = 'destination-in'
+  const fade = ctx.createLinearGradient(0, 0, 0, h)
+  fade.addColorStop(0, 'rgba(0, 0, 0, 0)')
+  fade.addColorStop(0.08, 'rgba(0, 0, 0, 1)')
+  fade.addColorStop(0.92, 'rgba(0, 0, 0, 1)')
   fade.addColorStop(1, 'rgba(0, 0, 0, 0)')
   ctx.fillStyle = fade
   ctx.fillRect(0, 0, w, h)
@@ -796,38 +843,36 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
       alpha: 0.04 + rng() * 0.09
     }))
 
-    const cloudBands: CloudBand[] = [
-      { y: 0.12, speed: 0.0032, scale: 0.18, alpha: 0.28, phase: rng(), blobs: [] },
-      { y: 0.28, speed: 0.0022, scale: 0.2, alpha: 0.24, phase: rng(), blobs: [] },
-      { y: 0.45, speed: 0.0016, scale: 0.22, alpha: 0.2, phase: rng(), blobs: [] },
-      { y: 0.61, speed: 0.001, scale: 0.24, alpha: 0.16, phase: rng(), blobs: [] }
+    const cloudTextures = [makeCloudTexture(0x51a3), makeCloudTexture(0x77c1)]
+    const cloudLayers = [
+      {
+        texture: cloudTextures[0],
+        y: 0.02,
+        height: 0.34,
+        scale: 0.95,
+        alpha: 0.8,
+        speed: 0.006,
+        phase: 0
+      },
+      {
+        texture: cloudTextures[1],
+        y: 0.18,
+        height: 0.36,
+        scale: 1.15,
+        alpha: 0.65,
+        speed: 0.009,
+        phase: 0.4
+      }
     ]
-    for (const band of cloudBands) {
-      band.blobs = Array.from({ length: 5 }, () => ({
-        x: rng(),
-        y: (rng() - 0.5) * 0.07,
-        r: 0.55 + rng() * 0.75,
-        alpha: 0.55 + rng() * 0.55
-      }))
-    }
 
     const backdrop = document.createElement('canvas')
+    const foreground = document.createElement('canvas')
     const soft = document.createElement('canvas')
     const softCtx = soft.getContext('2d')
     const emberSprite = radialSprite(32, [
       [0, 'rgba(255, 226, 158, 1)'],
       [0.25, 'rgba(255, 150, 60, 0.9)'],
       [1, 'rgba(255, 80, 20, 0)']
-    ])
-    const cloudCool = radialSprite(192, [
-      [0, 'rgba(78, 52, 86, 1)'],
-      [0.55, 'rgba(38, 22, 38, 0.55)'],
-      [1, 'rgba(10, 5, 12, 0)']
-    ])
-    const cloudWarm = radialSprite(192, [
-      [0, 'rgba(132, 90, 98, 1)'],
-      [0.55, 'rgba(64, 40, 52, 0.55)'],
-      [1, 'rgba(12, 5, 12, 0)']
     ])
     const fogTextures = [makeFogTexture(0x1a2b), makeFogTexture(0x3c4d)]
     const fogLayers = [
@@ -881,7 +926,8 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
       if (canvas.height !== ph) canvas.height = ph
       soft.width = Math.max(1, Math.round(width / 2))
       soft.height = Math.max(1, Math.round(height / 2))
-      paintBackdrop(backdrop, width, height, dpr)
+      paintSky(backdrop, width, height, dpr)
+      paintForeground(foreground, width, height, dpr)
     }
 
     const offStrike = on('strike', () => {
@@ -925,95 +971,23 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
       }
       ctx.globalAlpha = 1
 
-      const layer = softCtx ?? ctx
+      // ── Nubes: cielo detrás del paisaje ────────────────────────────────
       if (softCtx) {
         softCtx.setTransform(1, 0, 0, 1, 0, 0)
         softCtx.clearRect(0, 0, soft.width, soft.height)
         softCtx.setTransform(soft.width / width, 0, 0, soft.height / height, 0, 0)
       }
-
-      const mx = width * MOON.x
-      const my = height * MOON.y
-      for (const band of cloudBands) {
-        for (const blob of band.blobs) {
-          const x = (((blob.x + t * band.speed + band.phase) % 1.4) - 0.2) * width
-          const y =
-            (band.y + blob.y + Math.sin(t * 0.06 + band.phase) * 0.008) * height
-          const r = Math.min(width, height) * band.scale * blob.r
-          const rw = r * 2.3
-          const rh = r * 0.78
-          const moonlit = Math.max(0, 1 - Math.hypot(x - mx, y - my) / (width * 0.42))
-          const a = Math.min(0.5, band.alpha * blob.alpha * (0.8 + flash * 1.8))
-          layer.globalAlpha = a
-          layer.drawImage(cloudCool, x - rw / 2, y - rh / 2, rw, rh)
-          if (moonlit > 0.12) {
-            layer.globalAlpha = a * moonlit * 0.7
-            layer.drawImage(cloudWarm, x - rw / 2, y - rh / 2, rw, rh)
-          }
-        }
-      }
-      layer.globalAlpha = 1
-
-      layer.strokeStyle = 'rgba(168, 184, 216, 0.075)'
-      layer.lineWidth = 1
-      layer.beginPath()
-      for (const drop of rain) {
-        if (!reduced) {
-          drop.y += drop.speed * dt
-          drop.x -= drop.speed * 0.14 * dt
-          if (drop.y > 1.05) {
-            drop.y = -0.05
-            drop.x = rng()
-          }
-          if (drop.x < -0.05) drop.x = 1.05
-        }
-        layer.moveTo(drop.x * width, drop.y * height)
-        layer.lineTo(drop.x * width - 2, drop.y * height + drop.len)
-      }
-      layer.stroke()
-
-      const ground = layer.createLinearGradient(0, height * 0.8, 0, height)
-      ground.addColorStop(0, 'rgba(86, 96, 120, 0)')
-      ground.addColorStop(0.65, 'rgba(86, 96, 120, 0.06)')
-      ground.addColorStop(1, 'rgba(86, 96, 120, 0.14)')
-      layer.fillStyle = ground
-      layer.fillRect(0, height * 0.8, width, height * 0.2)
-
-      // Niebla continua: se repite en horizontal y avanza siempre a la derecha.
-      // Al cubrir de borde a borde no hay momento en que desaparezca.
-      for (const fogLayer of fogLayers) {
-        const tileW = Math.max(280, width * fogLayer.scale)
-        const tileH = height * fogLayer.height
-        const offset = (t * fogLayer.speed * tileW + fogLayer.phase * tileW) % tileW
-        layer.globalAlpha = fogLayer.alpha
+      const skyLayer = softCtx ?? ctx
+      for (const cloud of cloudLayers) {
+        const tileW = width * cloud.scale
+        const tileH = height * cloud.height
+        const offset = (t * cloud.speed * tileW + cloud.phase * tileW) % tileW
+        skyLayer.globalAlpha = Math.min(1, cloud.alpha * (1 + flash * 0.8))
         for (let x = offset - tileW; x < width; x += tileW) {
-          layer.drawImage(fogLayer.texture, x, fogLayer.y * height, tileW, tileH)
+          skyLayer.drawImage(cloud.texture, x, cloud.y * height, tileW, tileH)
         }
       }
-      layer.globalAlpha = 1
-
-      layer.save()
-      layer.globalCompositeOperation = 'lighter'
-      for (const ember of embers) {
-        if (!reduced) {
-          ember.y -= ember.speed * dt
-          ember.x += Math.sin(t * 0.6 + ember.phase) * 0.00035
-          if (ember.y < 0.42) {
-            ember.y = 0.92 + rng() * 0.08
-            ember.x = 0.08 + rng() * 0.84
-          }
-        }
-        const alpha = ember.alpha * (0.45 + 0.55 * Math.abs(Math.sin(t * 0.8 + ember.phase)))
-        layer.globalAlpha = alpha
-        const ex = ember.x * width
-        const ey = ember.y * height
-        const size = ember.r * 4
-        layer.drawImage(emberSprite, ex - size / 2, ey - size / 2, size, size)
-      }
-      layer.globalAlpha = 1
-
-      layer.restore()
-
+      skyLayer.globalAlpha = 1
       if (softCtx) ctx.drawImage(soft, 0, 0, width, height)
 
       if (!reduced) {
@@ -1064,6 +1038,77 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
           bat.dir
         )
       }
+
+      // ── Paisaje sólido: SIEMPRE delante de las nubes ───────────────────
+      ctx.drawImage(foreground, 0, 0, width, height)
+
+      // ── Suelo: lluvia, niebla y brasas ─────────────────────────────────
+      if (softCtx) {
+        softCtx.setTransform(1, 0, 0, 1, 0, 0)
+        softCtx.clearRect(0, 0, soft.width, soft.height)
+        softCtx.setTransform(soft.width / width, 0, 0, soft.height / height, 0, 0)
+      }
+      const groundLayer = softCtx ?? ctx
+
+      groundLayer.strokeStyle = 'rgba(168, 184, 216, 0.075)'
+      groundLayer.lineWidth = 1
+      groundLayer.beginPath()
+      for (const drop of rain) {
+        if (!reduced) {
+          drop.y += drop.speed * dt
+          drop.x -= drop.speed * 0.14 * dt
+          if (drop.y > 1.05) {
+            drop.y = -0.05
+            drop.x = rng()
+          }
+          if (drop.x < -0.05) drop.x = 1.05
+        }
+        groundLayer.moveTo(drop.x * width, drop.y * height)
+        groundLayer.lineTo(drop.x * width - 2, drop.y * height + drop.len)
+      }
+      groundLayer.stroke()
+
+      const ground = groundLayer.createLinearGradient(0, height * 0.8, 0, height)
+      ground.addColorStop(0, 'rgba(86, 96, 120, 0)')
+      ground.addColorStop(0.65, 'rgba(86, 96, 120, 0.06)')
+      ground.addColorStop(1, 'rgba(86, 96, 120, 0.14)')
+      groundLayer.fillStyle = ground
+      groundLayer.fillRect(0, height * 0.8, width, height * 0.2)
+
+      // Niebla continua: se repite en horizontal y avanza siempre a la derecha.
+      for (const fogLayer of fogLayers) {
+        const tileW = Math.max(280, width * fogLayer.scale)
+        const tileH = height * fogLayer.height
+        const offset = (t * fogLayer.speed * tileW + fogLayer.phase * tileW) % tileW
+        groundLayer.globalAlpha = fogLayer.alpha
+        for (let x = offset - tileW; x < width; x += tileW) {
+          groundLayer.drawImage(fogLayer.texture, x, fogLayer.y * height, tileW, tileH)
+        }
+      }
+      groundLayer.globalAlpha = 1
+
+      groundLayer.save()
+      groundLayer.globalCompositeOperation = 'lighter'
+      for (const ember of embers) {
+        if (!reduced) {
+          ember.y -= ember.speed * dt
+          ember.x += Math.sin(t * 0.6 + ember.phase) * 0.00035
+          if (ember.y < 0.42) {
+            ember.y = 0.92 + rng() * 0.08
+            ember.x = 0.08 + rng() * 0.84
+          }
+        }
+        const alpha = ember.alpha * (0.45 + 0.55 * Math.abs(Math.sin(t * 0.8 + ember.phase)))
+        groundLayer.globalAlpha = alpha
+        const ex = ember.x * width
+        const ey = ember.y * height
+        const size = ember.r * 4
+        groundLayer.drawImage(emberSprite, ex - size / 2, ey - size / 2, size, size)
+      }
+      groundLayer.globalAlpha = 1
+      groundLayer.restore()
+
+      if (softCtx) ctx.drawImage(soft, 0, 0, width, height)
 
       if (flash > 0.01) {
         ctx.save()
