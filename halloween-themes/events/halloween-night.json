@@ -356,6 +356,12 @@
         "bobHz": 2.6,
         "easing": "ease-in"
       }
+    },
+    {
+      "at": 9000,
+      "op": "overlay.emit",
+      "event": "strike",
+      "anchor": "lowest"
     }
   ],
   "onStop": [
