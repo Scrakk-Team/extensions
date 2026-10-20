@@ -90,11 +90,7 @@ interface RainDrop {
 const TAU = Math.PI * 2
 const MOON = { x: 0.76, y: 0.19, r: 0.072 }
 const HOUSE = { x: 0.17, y: 0.845 }
-const PUMPKINS = [
-  { x: 0.35, y: 0.945, s: 1 },
-  { x: 0.53, y: 0.965, s: 0.78 },
-  { x: 0.69, y: 0.94, s: 0.62 }
-]
+const PUMPKINS = [{ x: 0.945, y: 0.95, s: 0.95 }]
 
 /** PRNG determinista: la escena no cambia entre recargas ni entre equipos. */
 function mulberry32(seed: number): () => number {
@@ -584,7 +580,7 @@ function paintBackdrop(
   const unit = Math.min(w, h)
   drawTree(ctx, w * 0.055, h * 0.895, unit * 0.32, 11, 0.06)
   drawTree(ctx, w * 0.31, h * 0.875, unit * 0.24, 29, -0.08)
-  drawTree(ctx, w * 0.965, h * 0.965, unit * 0.82, 73, -0.24)
+  drawTree(ctx, w * 0.91, h * 0.965, unit * 0.82, 73, -0.24)
 
   drawPumpkins(ctx, w, h)
 
