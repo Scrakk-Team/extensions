@@ -790,7 +790,7 @@ function drawBat(
   ctx.restore()
 }
 
-export default function NightSky({ on }: OverlayProps): JSX.Element {
+export default function NightSky({ on, event }: OverlayProps): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
@@ -915,6 +915,14 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
     let flashAt = -1
     let meteor: Meteor | null = null
     let meteorTimer = 3 + rng() * 6
+    // En el evento, los murciélagos del fondo esperan a que el timeline avise
+    // `bats:start` (después de los que entran con el sonido). En un fondo de
+    // tema, sin evento, ya están visibles desde el arranque.
+    const isEventBackground = event?.id === 'halloween-night'
+    let batUnlockAt: number | null = isEventBackground ? null : 0
+    const offBatsStart = on('bats:start', () => {
+      if (batUnlockAt === null) batUnlockAt = performance.now()
+    })
 
     const resize = (): void => {
       dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -1026,9 +1034,17 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
         }
       }
 
-      for (const bat of bats) {
+      for (let i = 0; i < bats.length; i += 1) {
+        const bat = bats[i]
+        const reveal = !isEventBackground
+          ? 1
+          : batUnlockAt === null
+            ? 0
+            : Math.max(0, Math.min(1, (now - batUnlockAt - i * 900) / 2600))
+        if (reveal <= 0) continue
         const bx = (((bat.x + t * bat.speed * bat.dir) % 1.3) + 1.3) % 1.3 - 0.15
         const by = bat.y + Math.sin(t * bat.drift + bat.phase) * 0.018
+        ctx.globalAlpha = reveal
         drawBat(
           ctx,
           bx * width,
@@ -1038,6 +1054,7 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
           bat.dir
         )
       }
+      ctx.globalAlpha = 1
 
       // ── Paisaje sólido: SIEMPRE delante de las nubes ───────────────────
       ctx.drawImage(foreground, 0, 0, width, height)
@@ -1157,11 +1174,12 @@ export default function NightSky({ on }: OverlayProps): JSX.Element {
     return () => {
       disposed = true
       offStrike()
+      offBatsStart()
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', onResize)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [on])
+  }, [on, event?.id])
 
   return (
     <canvas

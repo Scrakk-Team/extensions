@@ -262,6 +262,11 @@
       "icon": "calendar"
     },
     {
+      "at": 8000,
+      "op": "overlay.emit",
+      "event": "bats:start"
+    },
+    {
       "at": 9000,
       "op": "audio.play",
       "sound": "trueno",
